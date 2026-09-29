@@ -38,6 +38,7 @@ app.post('/', (req, res) => {
 });
 
 const APP_SECRET = process.env.FB_APP_SECRET; // never in the browser
+const APP_ID = 1392638573074553;
 const GRAPH_VERSION = 'v25.0';
 
 app.post('/api/whatsapp/exchange-code', async (req, res) => {
