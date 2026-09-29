@@ -42,29 +42,24 @@ const GRAPH_VERSION = 'v25.0';
 
 app.post('/api/whatsapp/exchange-code', async (req, res) => {
   const { code, wabaId, phoneNumberId } = req.body;
+  console.log('Received from client:', { code, wabaId, phoneNumberId });
 
-  // 1. Exchange the code for a business token (server-side only - needs app secret)
-  const tokenRes = await axios.get(`https://graph.facebook.com/${GRAPH_VERSION}/oauth/access_token`, {
-    params: { client_id: '1392638573074553', client_secret: APP_SECRET, code }
-  });
-  const businessToken = tokenRes.data.access_token;
-  // TODO: store businessToken keyed by wabaId - this is what replaces her having to log in again
+  try {
+    const tokenRes = await fetch(
+      `https://graph.facebook.com/${GRAPH_VERSION}/oauth/access_token?client_id=${APP_ID}&client_secret=${APP_SECRET}&code=${code}`
+    );
+    const tokenData = await tokenRes.json();
+    console.log('Meta token response:', JSON.stringify(tokenData, null, 2));
 
-  // 2. Subscribe your app to webhooks on HER waba (not your test waba)
-  await axios.post(`https://graph.facebook.com/${GRAPH_VERSION}/${wabaId}/subscribed_apps`, {}, {
-    headers: { Authorization: `Bearer ${businessToken}` }
-  });
+    if (!tokenRes.ok) {
+      return res.status(500).json({ ok: false, error: tokenData });
+    }
 
-  // 3. Do NOT call /register - for coexistence the number is already registered
-
-  // 4. One-time syncs (each can only be called once per onboarding)
-  for (const sync_type of ['smb_app_state_sync', 'history']) {
-    await axios.post(`https://graph.facebook.com/${GRAPH_VERSION}/${phoneNumberId}/smb_app_data`,
-      { messaging_product: 'whatsapp', sync_type },
-      { headers: { Authorization: `Bearer ${businessToken}` } });
+    res.json({ ok: true, tokenData });
+  } catch (err) {
+    console.error('Unexpected error:', err);
+    res.status(500).json({ ok: false });
   }
-
-  res.json({ ok: true });
 });
 
 // Start the server
