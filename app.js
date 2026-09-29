@@ -44,18 +44,18 @@ const GRAPH_VERSION = 'v25.0';
 
 
 app.post('/api/whatsapp/exchange-code', async (req, res) => {
-  const { code, wabaId, phoneNumberId } = req.body;
+  const { code, wabaId, phoneNumberId, redirectUri } = req.body;
   console.log('Received from client:', { code, wabaId, phoneNumberId });
 
   const params = new URLSearchParams({
     client_id: APP_ID,
     client_secret: APP_SECRET,
     code,
-    redirect_uri: ''
+    redirect_uri: redirectUri
   });
   try {
     const tokenRes = await fetch(
-      `https://graph.facebook.com/${GRAPH_VERSION}/oauth/access_token?client_id=${APP_ID}&client_secret=${APP_SECRET}&code=${code}&redirect_uri=`
+      `https://graph.facebook.com/${GRAPH_VERSION}/oauth/access_token?${params}`
     );
     const tokenData = await tokenRes.json();
     console.log('Meta token response:', JSON.stringify(tokenData, null, 2));
