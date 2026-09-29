@@ -1,5 +1,9 @@
 // Import Express.js
 const express = require('express');
+const cors = require('cors');
+app.use(cors({
+  origin: ['https://byship.in', 'https://series-drizzle-undress.ngrok-free.dev'],
+}));
 
 // Create an Express app
 const app = express();
