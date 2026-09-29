@@ -1,15 +1,17 @@
 // Import Express.js
 const express = require('express');
 const cors = require('cors');
-app.use(cors({
-  origin: ['https://byship.in', 'https://series-drizzle-undress.ngrok-free.dev'],
-}));
+
 
 // Create an Express app
 const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+app.use(cors({
+  origin: ['https://byship.in', 'https://series-drizzle-undress.ngrok-free.dev'],
+}));
 
 // Set port and verify_token
 const port = process.env.PORT || 3000;
