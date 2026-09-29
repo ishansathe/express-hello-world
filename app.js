@@ -31,6 +31,36 @@ app.post('/', (req, res) => {
   res.status(200).end();
 });
 
+const APP_SECRET = process.env.FB_APP_SECRET; // never in the browser
+const GRAPH_VERSION = 'v25.0';
+
+app.post('/api/whatsapp/exchange-code', async (req, res) => {
+  const { code, wabaId, phoneNumberId } = req.body;
+
+  // 1. Exchange the code for a business token (server-side only - needs app secret)
+  const tokenRes = await axios.get(`https://graph.facebook.com/${GRAPH_VERSION}/oauth/access_token`, {
+    params: { client_id: '1392638573074553', client_secret: APP_SECRET, code }
+  });
+  const businessToken = tokenRes.data.access_token;
+  // TODO: store businessToken keyed by wabaId - this is what replaces her having to log in again
+
+  // 2. Subscribe your app to webhooks on HER waba (not your test waba)
+  await axios.post(`https://graph.facebook.com/${GRAPH_VERSION}/${wabaId}/subscribed_apps`, {}, {
+    headers: { Authorization: `Bearer ${businessToken}` }
+  });
+
+  // 3. Do NOT call /register - for coexistence the number is already registered
+
+  // 4. One-time syncs (each can only be called once per onboarding)
+  for (const sync_type of ['smb_app_state_sync', 'history']) {
+    await axios.post(`https://graph.facebook.com/${GRAPH_VERSION}/${phoneNumberId}/smb_app_data`,
+      { messaging_product: 'whatsapp', sync_type },
+      { headers: { Authorization: `Bearer ${businessToken}` } });
+  }
+
+  res.json({ ok: true });
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`\nListening on port ${port}\n`);
