@@ -55,7 +55,7 @@ app.post('/api/whatsapp/exchange-code', async (req, res) => {
   });
   try {
     const tokenRes = await fetch(
-      `https://graph.facebook.com/${GRAPH_VERSION}/oauth/access_token?client_id=${APP_ID}&client_secret=${APP_SECRET}&code=${code}&redirect_uri=''`
+      `https://graph.facebook.com/${GRAPH_VERSION}/oauth/access_token?client_id=${APP_ID}&client_secret=${APP_SECRET}&code=${code}&redirect_uri=`
     );
     const tokenData = await tokenRes.json();
     console.log('Meta token response:', JSON.stringify(tokenData, null, 2));
