@@ -45,7 +45,7 @@ const GRAPH_VERSION = 'v25.0';
 
 app.post('/api/whatsapp/exchange-code', async (req, res) => {
   const { code, wabaId, phoneNumberId, redirectUri } = req.body;
-  console.log('Received from client:', { code, wabaId, phoneNumberId });
+  console.log('Received from client:', req.body);
 
   const params = new URLSearchParams({
     client_id: APP_ID,
